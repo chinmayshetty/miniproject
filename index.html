@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusBites - Smart Canteen Coupons</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E85A2A;
+            --secondary: #F7931E;
+            --bg-light: #FFFFFF;
+            --bg-gray: #F8F9FA;
+            --text-dark: #2C3E50;
+            --text-light: #6C757D;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-hover: 0 8px 30px rgba(0,0,0,0.12);
+            --border-radius: 16px;
+        }
+
+        body.dark-mode {
+            --bg-light: #1A1A1A;
+            --bg-gray: #2D2D2D;
+            --text-dark: #FFFFFF;
+            --text-light: #B0B0B0;
+            --shadow: 0 4px 20px rgba(0,0,0,0.3);
+            --shadow-hover: 0 8px 30px rgba(0,0,0,0.4);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gray);
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        /* Navigation */
+        nav {
+            background: var(--bg-light);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .theme-toggle {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .cart-badge {
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.8rem;
+            margin-left: 0.3rem;
+        }
+
+        /* Landing Page */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 6rem 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+        }
+
+        .cta-button {
+            background: white;
+            color: var(--primary);
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: fadeInUp 0.8s ease 0.4s backwards;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--bg-light);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Menu Page */
+        .menu-header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+        }
+
+        .menu-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .menu-item {
+            background: var(--bg-light);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .menu-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .menu-item-content {
+            padding: 1.5rem;
+        }
+
+        .menu-item h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-item-category {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .menu-item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .add-to-cart {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .add-to-cart:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        /* Checkout Page */
+        .checkout-container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 2rem;
+        }
+
+        .cart-items {
+            background: var(--bg-light);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--bg-gray);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-total {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: right;
+            padding: 1rem;
+            color: var(--primary);
+        }
+
+        .qr-container {
+            background: var(--bg-light);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .qr-code {
+            max-width: 300px;
+            margin: 1rem auto;
+        }
+
+        /* Auth Page */
+        .auth-container {
+            min-height: 80vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .auth-form {
+            background: var(--bg-light);
+            padding: 3rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .auth-form h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px solid var(--bg-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gray);
+            color: var(--text-dark);
+            transition: border 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Admin Dashboard */
+        .admin-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: var(--bg-light);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: var(--text-dark);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .admin-section {
+            display: none;
+            background: var(--bg-light);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .item-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-gray);
+            border-radius: 8px;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        #qr-reader {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .scan-result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-gray);
+            border-radius: 8px;
+        }
+
+        /* Contact & Developers */
+        .contact-container, .developers-container {
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 2rem;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .team-member {
+            background: var(--bg-light);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .team-member:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .member-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            color: var(--primary);
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            transform: scale(1.2);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .empty-cart-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-hover);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">🍽️ CampusBites</div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="showPage('landing')">Home</a></li>
+            <li><a href="#" onclick="showPage('menu')">Menu</a></li>
+            <li><a href="#" onclick="showPage('checkout')">Cart <span class="cart-badge" id="cartBadge">0</span></a></li>
+            <li><a href="#" onclick="showPage('contact')">Contact</a></li>
+            <li><a href="#" onclick="showPage('developers')">Team</a></li>
+            <li><a href="#" onclick="showPage('auth')">Admin</a></li>
+        </ul>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+    </nav>
+
+    <!-- Landing Page -->
+    <div id="landing" class="page active">
+        <div class="hero">
+            <h1>Welcome to CampusBites</h1>
+            <p>Your Smart Campus Canteen Solution</p>
+            <button class="cta-button" onclick="showPage('menu')">Browse Menu</button>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Digital Coupons</h3>
+                <p>Generate QR codes instantly for your orders</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Quick Service</h3>
+                <p>Skip the queue with pre-ordered meals</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💳</div>
+                <h3>Cashless</h3>
+                <p>Easy and secure digital transactions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Page -->
+    <div id="menu" class="page">
+        <div class="menu-header">
+            <h1>Our Menu</h1>
+            <p>Fresh food, prepared daily</p>
+        </div>
+        <div class="menu-grid" id="menuGrid"></div>
+    </div>
+
+    <!-- Checkout Page -->
+    <div id="checkout" class="page">
+        <div class="checkout-container">
+            <h1 style="text-align: center; margin-bottom: 2rem;">Your Order</h1>
+            <div class="cart-items" id="cartItems"></div>
+            <div id="qrSection" style="display: none;">
+                <div class="qr-container">
+                    <h2>Your Order QR Code</h2>
+                    <p>Show this to the canteen staff</p>
+                    <img id="qrCodeImage" class="qr-code" alt="QR Code">
+                    <p style="margin-top: 1rem; color: var(--text-light);">Order ID: <span id="orderId"></span></p>
+                    <button class="cta-button" onclick="downloadQR()" style="margin-top: 1rem;">Download QR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Page -->
+    <div id="auth" class="page">
+        <div class="auth-container">
+            <div class="auth-form">
+                <h2>Admin Login</h2>
+                <form id="authForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Passcode</label>
+                        <input type="password" id="passcode" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin" class="page">
+        <div class="admin-container">
+            <div class="admin-header">
+                <h1>Admin Dashboard</h1>
+                <button class="delete-btn" onclick="logout()">Logout</button>
+            </div>
+            
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="showAdminTab('manage')">Manage Items</button>
+                <button class="tab-btn" onclick="showAdminTab('add')">Add Item</button>
+                <button class="tab-btn" onclick="showAdminTab('scanner')">QR Scanner</button>
+            </div>
+
+            <div id="manageSection" class="admin-section active">
+                <h2>Current Menu Items</h2>
+                <div class="item-list" id="adminItemList"></div>
+            </div>
+
+            <div id="addSection" class="admin-section">
+                <h2>Add New Item</h2>
+                <form id="addItemForm" onsubmit="addMenuItem(event)">
+                    <div class="form-group">
+                        <label>Item Name</label>
+                        <input type="text" id="itemName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price (₹)</label>
+                        <input type="number" id="itemPrice" required min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input type="text" id="itemCategory" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Image URL</label>
+                        <input type="url" id="itemImage" required placeholder="https://example.com/image.jpg">
+                    </div>
+                    <button type="submit" class="submit-btn">Add Item</button>
+                </form>
+            </div>
+
+            <div id="scannerSection" class="admin-section">
+                <h2>Scan Order QR Code</h2>
+                <p style="text-align: center; margin-bottom: 1rem; color: var(--text-light);">Point your camera at a customer's QR code</p>
+                <div id="qr-reader"></div>
+                <div id="scanResult" class="scan-result" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Page -->
+    <div id="contact" class="page">
+        <div class="contact-container">
+            <h1 style="text-align: center; margin-bottom: 2rem;">Contact Us</h1>
+            <div class="auth-form">
+                <div class="form-group">
+                    <label>📧 Email</label>
+                    <p style="padding: 0.9rem; color: var(--text-light);">support@campusbites.com</p>
+                </div>
+                <div class="form-group">
+                    <label>📞 Phone</label>
+                    <p style="padding: 0.9rem; color: var(--text-light);">+91 98765 43210</p>
+                </div>
+                <div class="form-group">
+                    <label>📍 Location</label>
+                    <p style="padding: 0.9rem; color: var(--text-light);">Campus Canteen, Main Building</p>
+                </div>
+                <div class="form-group">
+                    <label>🕐 Hours</label>
+                    <p style="padding: 0.9rem; color: var(--text-light);">Monday - Friday: 8:00 AM - 6:00 PM</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Developers Page -->
+    <div id="developers" class="page">
+        <div class="developers-container">
+            <h1 style="text-align: center; margin-bottom: 2rem;">Our Team</h1>
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 3rem;">Meet the talented developers behind CampusBites</p>
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="member-photo">👨‍💻</div>
+                    <h3>Rahul Sharma</h3>
+                    <p style="color: var(--text-light); margin: 0.5rem 0;">Lead Developer</p>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">Full-stack developer specializing in React and Python</p>
+                    <div class="social-links">
+                        <a href="#" title="GitHub">🔗</a>
+                        <a href="#" title="LinkedIn">💼</a>
+                        <a href="#" title="Twitter">🐦</a>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="member-photo">👩‍💻</div>
+                    <h3>Priya Patel</h3>
+                    <p style="color: var(--text-light); margin: 0.5rem 0;">UI/UX Designer</p>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">Creative designer with a passion for user experience</p>
+                    <div class="social-links">
+                        <a href="#" title="GitHub">🔗</a>
+                        <a href="#" title="LinkedIn">💼</a>
+                        <a href="#" title="Dribbble">🎨</a>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="member-photo">👨‍💻</div>
+                    <h3>Amit Kumar</h3>
+                    <p style="color: var(--text-light); margin: 0.5rem 0;">Backend Developer</p>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">Backend wizard with expertise in Flask and databases</p>
+                    <div class="social-links">
+                        <a href="#" title="GitHub">🔗</a>
+                        <a href="#" title="LinkedIn">💼</a>
+                        <a href="#" title="Twitter">🐦</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        let cart = [];
+        let menuItems = [];
+        let isAdmin = false;
+        let qrScanner = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMenu();
+            updateCartBadge();
+        });
+
+        // Theme Toggle
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.querySelector('.theme-toggle');
+            if (document.body.classList.contains('dark-mode')) {
+                btn.textContent = '☀️ Light Mode';
+            } else {
+                btn.textContent = '🌙 Dark Mode';
+            }
+        }
+
+        // Notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Page Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+
+            if (pageId === 'checkout') {
+                displayCart();
+            } else if (pageId === 'admin' && isAdmin) {
+                loadAdminItems();
+            } else if (pageId === 'admin' && !isAdmin) {
+                showPage('auth');
+                showNotification('Please login first');
+            }
+        }
+
+        // Load Menu
+        async function loadMenu() {
+            try {
+                const response = await fetch(`${API_URL}/menu`);
+                menuItems = await response.json();
+                displayMenu();
+            } catch (error) {
+                console.error('Error loading menu:', error);
+                // Fallback data
+                menuItems = [
+                    {id: 1, name: "Masala Dosa", price: 60, category: "South Indian", image: "https://images.unsplash.com/photo-1630383249896-424e482df921?w=400"},
+                    {id: 2, name: "Paneer Butter Masala", price: 120, category: "North Indian", image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400"},
+                    {id: 3, name: "Veg Biryani", price: 100, category: "Rice", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400"},
+                    {id: 4, name: "Chole Bhature", price: 80, category: "North Indian", image: "https://images.unsplash.com/photo-1626132647523-66f5bf380027?w=400"},
+                    {id: 5, name: "Idli Sambar", price: 40, category: "South Indian", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400"},
+                    {id: 6, name: "Veg Sandwich", price: 50, category: "Snacks", image: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400"}
+                ];
+                displayMenu();
+            }
+        }
+
+        function displayMenu() {
+            const grid = document.getElementById('menuGrid');
+            grid.innerHTML = menuItems.map(item => `
+                <div class="menu-item">
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="menu-item-content">
+                        <h3>${item.name}</h3>
+                        <p class="menu-item-category">${item.category}</p>
+                        <div class="menu-item-footer">
+                            <span class="price">₹${item.price}</span>
+                            <button class="add-to-cart" onclick="addToCart(${item.id})">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Cart Functions
+        function addToCart(itemId) {
+            const item = menuItems.find(i => i.id === itemId);
+            const existing = cart.find(i => i.id === itemId);
+            
+            if (existing) {
+                existing.quantity++;
+            } else {
+                cart.push({...item, quantity: 1});
+            }
+            
+            updateCartBadge();
+            showNotification('Item added to cart!');
+        }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cartBadge');
+            const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+            badge.textContent = total;
+        }
+
+        function displayCart() {
+            const container = document.getElementById('cartItems');
+            
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">🛒</div>
+                        <h3>Your cart is empty</h3>
+                        <p>Add some delicious items to get started!</p>
+                        <button class="cta-button" onclick="showPage('menu')" style="margin-top: 1rem;">Browse Menu</button>
+                    </div>
+                `;
+                document.getElementById('qrSection').style.display = 'none';
+                return;
+            }
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            container.innerHTML = `
+                ${cart.map(item => `
+                    <div class="cart-item">
+                        <div>
+                            <strong>${item.name}</strong>
+                            <p style="color: var(--text-light); font-size: 0.9rem;">Quantity: ${item.quantity}</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="price">₹${item.price * item.quantity}</div>
+                            <button class="delete-btn" onclick="removeFromCart(${item.id})" style="margin-top: 0.5rem; padding: 0.3rem 0.8rem; font-size: 0.9rem;">Remove</button>
+                        </div>
+                    </div>
+                `).join('')}
+                <div class="cart-total">Total: ₹${total}</div>
+                <button class="submit-btn" onclick="generateQR()">Generate QR Code</button>
+            `;
+        }
+
+        function removeFromCart(itemId) {
+            cart = cart.filter(item => item.id !== itemId);
+            updateCartBadge();
+            displayCart();
+            showNotification('Item removed from cart');
+        }
+
+        async function generateQR() {
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            try {
+                const response = await fetch(`${API_URL}/generate-qr`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({items: cart, total})
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('qrCodeImage').src = data.qr_code;
+                document.getElementById('orderId').textContent = data.order_id;
+                document.getElementById('qrSection').style.display = 'block';
+                
+                showNotification('QR Code generated successfully!');
+            } catch (error) {
+                console.error('Error generating QR:', error);
+                showNotification('Error generating QR code. Make sure the backend server is running.');
+            }
+        }
+
+        function downloadQR() {
+            const qrImage = document.getElementById('qrCodeImage');
+            const link = document.createElement('a');
+            link.download = 'campusbites-order.png';
+            link.href = qrImage.src;
+            link.click();
+            showNotification('QR Code downloaded!');
+        }
+
+        // Admin Functions
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const passcode = document.getElementById('passcode').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/auth`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password, passcode})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    isAdmin = true;
+                    showPage('admin');
+                    showNotification('Login successful!');
+                    document.getElementById('authForm').reset();
+                } else {
+                    showNotification('Invalid credentials!');
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                showNotification('Error connecting to server. Make sure backend is running.');
+            }
+        }
+
+        function logout() {
+            isAdmin = false;
+            showPage('landing');
+            showNotification('Logged out successfully');
+        }
+
+        function showAdminTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.admin-section').forEach(section => section.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`${tabName}Section`).classList.add('active');
+            
+            if (tabName === 'manage') {
+                loadAdminItems();
+            } else if (tabName === 'scanner') {
+                initScanner();
+            }
+        }
+
+        async function loadAdminItems() {
+            try {
+                const response = await fetch(`${API_URL}/menu`);
+                menuItems = await response.json();
+                
+                const list = document.getElementById('adminItemList');
+                list.innerHTML = menuItems.map(item => `
+                    <div class="item-row">
+                        <div>
+                            <strong>${item.name}</strong>
+                            <p style="color: var(--text-light); font-size: 0.9rem;">${item.category} - ₹${item.price}</p>
+                        </div>
+                        <button class="delete-btn" onclick="deleteMenuItem(${item.id})">Delete</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading admin items:', error);
+            }
+        }
+
+        async function addMenuItem(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('itemName').value;
+            const price = document.getElementById('itemPrice').value;
+            const category = document.getElementById('itemCategory').value;
+            const image = document.getElementById('itemImage').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/menu`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name, price, category, image})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Item added successfully!');
+                    document.getElementById('addItemForm').reset();
+                    loadMenu();
+                    loadAdminItems();
+                }
+            } catch (error) {
+                console.error('Error adding item:', error);
+                showNotification('Error adding item');
+            }
+        }
+
+        async function deleteMenuItem(itemId) {
+            if (!confirm('Are you sure you want to delete this item?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/menu/${itemId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Item deleted successfully!');
+                    loadMenu();
+                    loadAdminItems();
+                }
+            } catch (error) {
+                console.error('Error deleting item:', error);
+                showNotification('Error deleting item');
+            }
+        }
+
+        // QR Scanner
+        function initScanner() {
+            if (qrScanner) {
+                qrScanner.clear();
+            }
+            
+            qrScanner = new Html5Qrcode("qr-reader");
+            
+            qrScanner.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                onScanSuccess,
+                onScanFailure
+            ).catch(err => {
+                console.error('Error starting scanner:', err);
+                document.getElementById('qr-reader').innerHTML = `
+                    <p style="text-align: center; color: var(--text-light); padding: 2rem;">
+                        Unable to access camera. Please allow camera permissions or use the file upload option below.
+                    </p>
+                    <input type="file" accept="image/*" onchange="scanFromFile(event)" style="display: block; margin: 1rem auto;">
+                `;
+            });
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            try {
+                const orderData = JSON.parse(decodedText);
+                displayOrderDetails(orderData);
+                qrScanner.stop();
+            } catch (error) {
+                console.error('Error parsing QR data:', error);
+            }
+        }
+
+        function onScanFailure(error) {
+            // Silent fail - don't spam console
+        }
+
+        function scanFromFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                Html5Qrcode.scanFile(file, true)
+                    .then(decodedText => {
+                        const orderData = JSON.parse(decodedText);
+                        displayOrderDetails(orderData);
+                    })
+                    .catch(err => {
+                        showNotification('Failed to scan QR code from file');
+                    });
+            }
+        }
+
+        function displayOrderDetails(orderData) {
+            const resultDiv = document.getElementById('scanResult');
+            const itemsList = orderData.items.map(item => 
+                `<li>${item.name} x${item.quantity} - ₹${item.price * item.quantity}</li>`
+            ).join('');
+            
+            resultDiv.innerHTML = `
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">Order Scanned Successfully! ✓</h3>
+                <p><strong>Order ID:</strong> ${orderData.order_id}</p>
+                <p><strong>Items:</strong></p>
+                <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                    ${itemsList}
+                </ul>
+                <p style="font-size: 1.3rem; font-weight: 700; color: var(--primary); margin-top: 1rem;">
+                    <strong>Total:</strong> ₹${orderData.total}
+                </p>
+                <button class="submit-btn" onclick="initScanner()" style="margin-top: 1rem;">Scan Another</button>
+            `;
+            resultDiv.style.display = 'block';
+        }
+
+// All your JavaScript code here (the fixed section)
+function updateCartBadge() {
+    const badge = document.getElementById('cartBadge');
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    badge.textContent = totalItems;
+}
+
+function displayCart() {
+    const container = document.getElementById('cartItems');
+    if (cart.length === 0) {
+        container.innerHTML = `
+            <div class="empty-cart">
+                <div class="empty-cart-icon">🛒</div>
+                <p>Your cart is empty</p>
+            </div>`;
+        document.getElementById('qrSection').style.display = 'none';
+        return;
+    }
+
+    container.innerHTML = cart.map(item => `
+        <div class="cart-item">
+            <span>${item.name} x ${item.quantity}</span>
+            <span>₹${item.price * item.quantity}</span>
+        </div>
+    `).join('') + `
+        <div class="cart-total">
+            Total: ₹${cart.reduce((t, i) => t + i.price * i.quantity, 0)}
+        </div>
+        <button class="cta-button" onclick="generateQR()">Generate QR</button>
+    `;
+}
+
+function generateQR() {
+    const orderId = 'ORD' + Math.floor(Math.random() * 10000);
+    document.getElementById('orderId').textContent = orderId;
+    const qrImage = document.getElementById('qrCodeImage');
+    qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?data=${orderId}&size=200x200`;
+    document.getElementById('qrSection').style.display = 'block';
+    showNotification('QR generated successfully!');
+}
+
+function downloadQR() {
+    const qrImage = document.getElementById('qrCodeImage');
+    const link = document.createElement('a');
+    link.href = qrImage.src;
+    link.download = 'order_qr.png';
+    link.click();
+}
+
+    </script>
+</body>
+</html>
